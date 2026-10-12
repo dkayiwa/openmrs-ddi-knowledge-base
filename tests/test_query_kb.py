@@ -77,6 +77,21 @@ class QueryKbTest(unittest.TestCase):
                 self.assertTrue(found, n)
                 self.assertEqual({d["rxcui"] for d in found}, {e["rxcui"]}, n)
 
+    def test_clinical_abbreviations_resolve_to_their_own_substance(self):
+        # TDF, 3TC, INH: as clinicians write them. Each resolves to the rows of the RxCUI it is listed under and to
+        # nothing else, and the abbreviations left out on purpose resolve to nothing.
+        import json as _json
+        doc = _json.load(open(os.path.join(ROOT, "src", "clinical_abbreviations.json")))
+        for e in doc["entries"]:
+            for n in e["abbreviations"]:
+                found = self.kb.resolve(n)
+                self.assertEqual({d["rxcui"] for d in found}, {e["rxcui"]}, n)
+        self.assertEqual([d["name"] for d in self.kb.resolve("tdf")], ["Tenofovir disoproxil"])
+        self.assertEqual(sorted(d["name"] for d in self.kb.resolve("3TC")), sorted(d["name"] for d in self.kb.resolve("lamivudine")))
+        for left_out in ("ddI", "ABC", "ASA", "CTX"):
+            with self.assertRaises(Unresolved, msg=left_out):
+                self.kb.resolve(left_out)
+
     def test_unresolved_offers_suggestions(self):
         with self.assertRaises(Unresolved) as cm:
             self.kb.resolve("warfarine")

@@ -15,6 +15,7 @@ Pipeline:
   6. ATC                  src/atc_cache.jsonl (pre-derived from RxNorm, level-5)
   6b. brand names         src/brand_names.jsonl (RxNorm BN concepts per ingredient; issue #5)
   6c. international names src/international_names.json (curated INN/BAN names per ingredient; issue #8)
+  6d. abbreviations      src/clinical_abbreviations.json (curated clinical abbreviations per ingredient)
   7. drug-disease rows    src/disease_interactions.jsonl (DDInter's drug-disease table)
   8. derived tier         condition-mediated chains inferred from step 7 (query_kb.py's matcher)
 
@@ -39,6 +40,9 @@ brands = {r["rxcui"]: r["brand_names"] for r in jsonl(S + "brand_names.jsonl")}
 # listed by hand and checked against the built drugs below (issue #8).
 intl_doc = json.load(open(S + "international_names.json"))
 intl = {e["rxcui"]: e["international_names"] for e in intl_doc["entries"]}
+# 6d. Curated likewise: clinicians write TDF, 3TC, INH; no source carries them as names of the drug alone.
+abbr_doc = json.load(open(S + "clinical_abbreviations.json"))
+abbr = {e["rxcui"]: e["abbreviations"] for e in abbr_doc["entries"]}
 curation = {o["id"]: o for o in json.load(open(S + "curation.json"))["overrides"]}
 drugs_raw = jsonl(S + "drugs.jsonl")
 interactions = [json.loads(l) for l in open(S + "interactions.jsonl")]
@@ -100,6 +104,7 @@ for d in drugs_raw:
         "atc": atc.get(rx, []) if rx else [],
         "brand_names": brands.get(rx, []) if rx else [],
         "international_names": intl.get(rx, []) if rx else [],
+        "abbreviations": abbr.get(rx, []) if rx else [],
         "ciel": ciel_for(rx),
     })
 
@@ -137,6 +142,21 @@ for e in intl_doc["entries"]:
             bad_intl.append(f'{n}: already an alias of {sorted(alias_owner[n.lower()])}')
 if bad_intl:
     print("BUILD FAILED: src/international_names.json:", "; ".join(bad_intl))
+    sys.exit(1)
+# --- invariant: every abbreviation is the curated entry's own and no other drug's, nor an international name ---
+for d in drugs:
+    for n in d["international_names"]:
+        alias_owner.setdefault(n.lower(), set()).add(d["id"])
+bad_abbr = []
+for e in abbr_doc["entries"]:
+    rows = by_rx.get(e["rxcui"], [])
+    if not rows or any((r["rxnorm_name"] or "").lower() != e["rxnorm_name"].lower() for r in rows):
+        bad_abbr.append(f'{e["rxcui"]} {e["rxnorm_name"]}: matches no built drug of that RxCUI and name')
+    for n in e["abbreviations"]:
+        if n.lower() in alias_owner:
+            bad_abbr.append(f'{n}: already an alias of {sorted(alias_owner[n.lower()])}')
+if bad_abbr:
+    print("BUILD FAILED: src/clinical_abbreviations.json:", "; ".join(bad_abbr))
     sys.exit(1)
 
 # --- mechanisms: used groups only, stored once ---
@@ -201,7 +221,7 @@ derived.sort(key=lambda r: (drug_pos[r[0]], drug_pos[r[4]], r[5]))
 
 kb = {
     "metadata": {
-        "schema_version": "1.4",
+        "schema_version": "1.5",
         "title": "OpenMRS DDI knowledge base (normalized)",
         "source": {"name": "DDInter 2.0", "url": "https://ddinter2.scbdd.com/",
                    "tables": "drug-drug interactions; drug-disease interactions",
