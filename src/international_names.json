@@ -1,5 +1,5 @@
 {
- "note": "Curated international (WHO INN, or the older British Approved Name still in clinical use) names for drugs whose knowledge-base names are the US ones (issue #8). Keyed by the ingredient RxCUI, as brand_names is, so every row of the substance carries them. A name is listed only where it is a drug name and not an ordinary word or a lab-test name (so 'thyroxine' is left out), and only for a single substance (so co-trimoxazole is left out). Chlorphenamine is left out while issue #6 stands: the Chlorpheniramine row carries chlorine's RxCUI. build_kb.py fails if an entry's RxCUI or name does not match the built drugs, or if a name is already an alias of any drug.",
+ "note": "Curated international (WHO INN, or the older British Approved Name still in clinical use) names for drugs whose knowledge-base names are the US ones (issue #8). Keyed by the ingredient RxCUI, as brand_names is, so every row of the substance carries them. A name is listed only where it is a drug name and not an ordinary word or a lab-test name (so 'thyroxine' is left out, and scopolamine is named 'Hyoscine hydrobromide' and never bare 'Hyoscine', which most often means hyoscine butylbromide, a different drug), and only for a single substance (so co-trimoxazole is left out). Chlorphenamine is left out while issue #6 stands: the Chlorpheniramine row carries chlorine's RxCUI. build_kb.py fails if an entry's RxCUI or name does not match the built drugs, or if a name is already an alias of any drug.",
  "entries": [
   {
    "rxcui": "161",
@@ -153,7 +153,7 @@
    "rxcui": "9601",
    "rxnorm_name": "scopolamine",
    "international_names": [
-    "Hyoscine"
+    "Hyoscine hydrobromide"
    ]
   },
   {
