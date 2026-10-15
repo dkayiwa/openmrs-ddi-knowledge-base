@@ -1,5 +1,5 @@
 {
-  "description": "Clinician curation decisions applied after algorithmic RxNorm canonicalization. build_kb.py applies these overrides so the canonical KB is reproducible. Reasons: 'separation' = clinically distinct drugs the ingredient match had merged; 'remap' = obsolete concept remapped to its correct current RxCUI; 'gap' = obsolete/low-relevance concept with no safe current mapping, left null (surfaced as a knowledge gap).",
+  "description": "Clinician curation decisions applied after algorithmic RxNorm canonicalization. build_kb.py applies these overrides so the canonical KB is reproducible. Reasons: 'separation' = clinically distinct drugs the ingredient match had merged; 'remap' = obsolete concept remapped to its correct current RxCUI; 'gap' = obsolete/low-relevance concept with no safe current mapping, left null (surfaced as a knowledge gap); 'mismatch' = the name match returned a different substance, so the row is mapped to the substance its DDInter name and DrugBank id identify (DDInter1724 Sulfamethoxazole, DB01015, had been matched to sulfamethazine, so its ATC code, brand names and CIEL concepts were sulfamethazine's and the combination's brands reached trimethoprim alone; measured by dkayiwa on openmrs-module-chartsearchai, where 'Can I give him Bactrim?' of a patient on warfarin never checked the Major sulfamethoxazole-warfarin interaction. Added 2026-10-15, open to review).",
   "reviewed_by": "clinician (physician-informatician)",
   "date": "2026-07-21",
   "brand_exclusions": {
@@ -27,6 +27,13 @@
       "rxcui": "9601",
       "rxnorm_name": "scopolamine",
       "reason": "separation"
+    },
+    {
+      "id": "DDInter1724",
+      "name": "Sulfamethoxazole",
+      "rxcui": "10180",
+      "rxnorm_name": "sulfamethoxazole",
+      "reason": "mismatch"
     },
     {
       "id": "DDInter1807",

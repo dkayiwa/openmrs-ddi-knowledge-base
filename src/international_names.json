@@ -1,5 +1,5 @@
 {
- "note": "Curated international (WHO INN, or the older British Approved Name still in clinical use) names for drugs whose knowledge-base names are the US ones (issue #8). Keyed by the ingredient RxCUI, as brand_names is, so every row of the substance carries them. A name is listed only where it is a drug name and not an ordinary word or a lab-test name (so 'thyroxine' is left out, and scopolamine is named 'Hyoscine hydrobromide' and never bare 'Hyoscine', which most often means hyoscine butylbromide, a different drug), and only for a single substance (so co-trimoxazole is left out). Chlorphenamine is left out while issue #6 stands: the Chlorpheniramine row carries chlorine's RxCUI. build_kb.py fails if an entry's RxCUI or name does not match the built drugs, or if a name is already an alias of any drug.",
+ "note": "Curated international (WHO INN, or the older British Approved Name still in clinical use) names for drugs whose knowledge-base names are the US ones (issue #8). Keyed by the ingredient RxCUI, as brand_names is, so every row of the substance carries them. A name is listed only where it is a drug name and not an ordinary word or a lab-test name (so 'thyroxine' is left out, and scopolamine is named 'Hyoscine hydrobromide' and never bare 'Hyoscine', which most often means hyoscine butylbromide, a different drug), and a combination's own name is listed under every ingredient it contains, as brand_names files a combination's brands (Bactrim under sulfamethoxazole and trimethoprim), so a question naming the combination checks each of them: co-trimoxazole and co-amoxiclav, each under both of its ingredients. Chlorphenamine is left out while issue #6 stands: the Chlorpheniramine row carries chlorine's RxCUI. build_kb.py fails if an entry's RxCUI or name does not match the built drugs, or if a name is already an alias of any drug.",
  "entries": [
   {
    "rxcui": "161",
@@ -19,7 +19,8 @@
    "rxcui": "723",
    "rxnorm_name": "amoxicillin",
    "international_names": [
-    "Amoxycillin"
+    "Amoxycillin",
+    "Co-amoxiclav"
    ]
   },
   {
@@ -55,6 +56,13 @@
    "rxnorm_name": "cholestyramine resin",
    "international_names": [
     "Colestyramine"
+   ]
+  },
+  {
+   "rxcui": "48203",
+   "rxnorm_name": "clavulanate",
+   "international_names": [
+    "Co-amoxiclav"
    ]
   },
   {
@@ -164,6 +172,14 @@
    ]
   },
   {
+   "rxcui": "10180",
+   "rxnorm_name": "sulfamethoxazole",
+   "international_names": [
+    "Co-trimoxazole",
+    "Cotrimoxazole"
+   ]
+  },
+  {
    "rxcui": "9524",
    "rxnorm_name": "sulfasalazine",
    "international_names": [
@@ -175,6 +191,14 @@
    "rxnorm_name": "trihexyphenidyl",
    "international_names": [
     "Benzhexol"
+   ]
+  },
+  {
+   "rxcui": "10829",
+   "rxnorm_name": "trimethoprim",
+   "international_names": [
+    "Co-trimoxazole",
+    "Cotrimoxazole"
    ]
   }
  ]

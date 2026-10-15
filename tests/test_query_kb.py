@@ -66,16 +66,33 @@ class QueryKbTest(unittest.TestCase):
         self.assertEqual([d["name"] for d in kb.resolve("glibenclamide")], ["Glyburide"])
         self.assertEqual([d["name"] for d in kb.resolve("PETHIDINE")], ["Meperidine"])
 
-    def test_every_international_name_names_only_its_own_substance(self):
+    def test_every_international_name_names_exactly_the_substances_it_is_listed_under(self):
         # The build refuses a name already an alias of any drug; this pins that each curated name resolves to the
-        # rows of the RxCUI it is listed under and to nothing else.
+        # rows of the RxCUIs it is listed under and to nothing else: one substance's for a single drug, every
+        # ingredient's for a combination's own name, as a combination's brands are filed.
         import json as _json
         doc = _json.load(open(os.path.join(ROOT, "src", "international_names.json")))
+        listed = {}
         for e in doc["entries"]:
             for n in e["international_names"]:
-                found = self.kb.resolve(n)
-                self.assertTrue(found, n)
-                self.assertEqual({d["rxcui"] for d in found}, {e["rxcui"]}, n)
+                listed.setdefault(n, set()).add(e["rxcui"])
+        for n, rxcuis in listed.items():
+            found = self.kb.resolve(n)
+            self.assertTrue(found, n)
+            self.assertEqual({d["rxcui"] for d in found}, rxcuis, n)
+        for n in ("co-trimoxazole", "Cotrimoxazole"):
+            self.assertEqual(sorted(d["name"] for d in self.kb.resolve(n)), ["Sulfamethoxazole", "Trimethoprim"], n)
+        self.assertEqual(sorted(d["name"] for d in self.kb.resolve("co-amoxiclav")), ["Amoxicillin", "Clavulanic acid"])
+
+    def test_sulfamethoxazole_is_its_own_substance_and_the_combinations_brands_reach_it(self):
+        # curation.json 'mismatch': DDInter1724 had been matched to sulfamethazine, so it carried that drug's ATC code
+        # and CIEL concepts, and Bactrim, filed under trimethoprim alone, never checked the Major sulfamethoxazole-warfarin
+        # interaction.
+        smx = self.kb.resolve_one("id:DDInter1724")
+        self.assertEqual((smx["rxcui"], smx["rxnorm_name"], smx["atc"]), ("10180", "sulfamethoxazole", ["J01EC01"]))
+        self.assertIn("Sulfamethoxazole / trimethoprim", [c["name"] for c in smx["ciel"]])
+        self.assertEqual(sorted(d["name"] for d in self.kb.resolve("Bactrim")), ["Sulfamethoxazole", "Trimethoprim"])
+        self.assertEqual([r["severity"] for r in self.kb.pair("sulfamethoxazole", "warfarin")], ["Major"])
 
     def test_clinical_abbreviations_resolve_to_their_own_substance(self):
         # TDF, 3TC, INH: as clinicians write them. Each resolves to the rows of the RxCUI it is listed under and to
